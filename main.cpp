@@ -1,5 +1,8 @@
 #include <iostream>
 
+using namespace std;
+
+
 template <typename T>
 struct Node{
     T Data;
@@ -67,42 +70,98 @@ private:
 
 
 template <typename T>
-class MyForwardList{
+class MyForwardList
+{
 private:
-    Node* _head;
-    Node* _tail;
-
+    Node<T>* _head;
+    Node<T>* _tail;
 public:
-    ListIterator() {
+    MyForwardList() {
         _head = nullptr;
         _tail = nullptr;
     }
 
-    void Add(){
-        if (_head == nullptr){
-            _head = new Node<T>(data, nullptr)
+    void Add(T data) {
+        if (_head == nullptr) {
+            _head = new Node<T>(data, nullptr);
+            _tail = _head;
+        } else {
+            _tail->Next = new Node<T>(data, nullptr);
+            _tail = _tail->Next;
         }
-
     }
-    void Delete(){}
-    bool Contane(){}
+    // тут тоже допилить
+    void Delete(T data) {
+        ListIterator<T>* tmp = _head;
 
-    ListIterator begin(){
+        if(tmp->_node->Data == data) { delete [] _head; _head = tmp->_node->Next; }
+        
+        while(tmp != nullptr){
+            if (tmp->_node->Next->Data == data){
+                ListIterator<T>* ctmp = tmp;
+                tmp->_node->Next = tmp->_node->Next->Next;
+                if (ctmp->_node->Next == _tail) { _tail = tmp->_node;}
+                delete [] ctmp->_node->Next;
+                return;
+            }
+            else tmp++;
+        }
+    }
+//доделать костантный оператор 
+    bool Contains(T data) {
+        ListIterator<T>* tmp = _head;
+        while(tmp != nullptr){
+            if (tmp->Data == data){
+                return true;
+            }
+            tmp = tmp->Next;
+        }
+        return false;
+    }
+
+    ListIterator<T> begin() {
         return ListIterator<T>(_head);
     }
-    ListIterator end(){
+
+    ListIterator<T> end() {
         return ListIterator<T>(_tail->Next);
     }
-    ConstListIterator cbegin(){
-        return ConstListIterator<T>(_head);
+
+    ConstListIterator<T> cbegin() {
+        return ConstListIterator<T>(_tail);
     }
-    ConstListIterator cend(){
-        return ConstListIterator<T>(_tail->Next);
+
+    ConstListIterator<T> cend() {
+        return ConstListIterator<T>(_tail);
     }
+
+    // ~MyForwardList(){
+    //     Node<T>* cur = _head;
+
+    //     while (cur->Next != nullptr){
+
+    //     }
+    // }
+
+
 };
 
 
-int main(){
+
+int main() {
+    MyForwardList<int> mfl;
+    mfl.Add(5);
+    mfl.Add(-5);
+    mfl.Add(1);
+    mfl.Add(100);
+
+    mfl.Contains(100) ? cout << "Yes" << endl : cout << "No" << endl;
+    mfl.Delete(1);
+    mfl.Contains(1) ? cout << "Yes" << endl : cout << "No" << endl;
+    for (auto a: mfl) {
+        std::cout << a << std::endl;
+    }
+
 
     return 0;
 }
