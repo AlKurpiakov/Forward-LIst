@@ -33,6 +33,8 @@ struct ListIterator
 
     ListIterator operator++(int) {ListIterator tmp = *this; _node = _node->Next; return tmp;};
 
+    Node<T>* GetNode()  {return _node;}
+
     friend bool operator==(const ListIterator& a, const ListIterator& b) {return a._node == b._node;};
 
     friend bool operator!=(const ListIterator& a, const ListIterator& b){return a._node != b._node;};
@@ -92,29 +94,35 @@ public:
     }
     // тут тоже допилить
     void Delete(T data) {
-        ListIterator<T>* tmp = _head;
-
-        if(tmp->_node->Data == data) { delete [] _head; _head = tmp->_node->Next; }
+        if (!_head) return; 
         
-        while(tmp != nullptr){
-            if (tmp->_node->Next->Data == data){
-                ListIterator<T>* ctmp = tmp;
-                tmp->_node->Next = tmp->_node->Next->Next;
-                if (ctmp->_node->Next == _tail) { _tail = tmp->_node;}
-                delete [] ctmp->_node->Next;
+        ListIterator<T> it = begin();
+        if (*it == data) {
+            Node<T>* tmp = _head;
+            _head = _head->Next;
+            delete tmp;
+            if (!_head) _tail = nullptr;
+            return;
+        }
+        it++;
+        Node<T>* tmp = _head;
+        Node<T>* cur = _head->Next;
+        for (it; it != end(); it++) {
+            if (*it == data) {
+                tmp->Next = cur->Next;
+                if (cur == _tail) _tail = tmp;
+                delete cur;
                 return;
             }
-            else tmp++;
+            tmp = cur;
+            cur = cur->Next;
         }
-    }
-//доделать костантный оператор 
+    };
+
     bool Contains(T data) {
-        ListIterator<T>* tmp = _head;
-        while(tmp != nullptr){
-            if (tmp->Data == data){
-                return true;
-            }
-            tmp = tmp->Next;
+        ListIterator<T> it = begin(); 
+        for (it; it != end(); it++){
+            if (*it == data) { return true; }
         }
         return false;
     }
@@ -128,20 +136,25 @@ public:
     }
 
     ConstListIterator<T> cbegin() {
-        return ConstListIterator<T>(_tail);
+        return ConstListIterator<T>(_head);
     }
 
     ConstListIterator<T> cend() {
-        return ConstListIterator<T>(_tail);
+        return ConstListIterator<T>(_tail->Next);
     }
 
-    // ~MyForwardList(){
-    //     Node<T>* cur = _head;
-
-    //     while (cur->Next != nullptr){
-
-    //     }
-    // }
+    ~MyForwardList(){
+        ListIterator<T> it = begin();
+        Node<T>* tmp = _head;
+        Node<T>* cur = _head->Next;
+        for (it; it != end(); it++) {
+            delete tmp;
+            if (cur->Next == nullptr) break;
+            tmp = cur;
+            cur = cur->Next;
+        }
+        delete cur;
+    }
 
 
 };
@@ -155,9 +168,10 @@ int main() {
     mfl.Add(1);
     mfl.Add(100);
 
-    mfl.Contains(100) ? cout << "Yes" << endl : cout << "No" << endl;
-    mfl.Delete(1);
-    mfl.Contains(1) ? cout << "Yes" << endl : cout << "No" << endl;
+    cout << ((mfl.Contains(100)) ? "YES" : "NO") << endl;
+    mfl.Delete(100);
+    cout << ((mfl.Contains(100)) ? "YES" : "NO" )<< endl;
+
     for (auto a: mfl) {
         std::cout << a << std::endl;
     }
